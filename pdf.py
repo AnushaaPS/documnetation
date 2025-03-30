@@ -5,6 +5,9 @@ from docx.oxml import parse_xml
 from docx.oxml.ns import nsdecls
 from io import BytesIO
 import pypandoc
+
+pypandoc.download_pandoc()  # Downloads Pandoc inside the environment
+
 import pdfkit
 import os
 
