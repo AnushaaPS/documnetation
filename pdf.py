@@ -111,8 +111,13 @@ def convert_docx_to_pdf(html_content):
     if not isinstance(html_content, str):
         raise TypeError(f"html_content must be a string, got: {type(html_content)}")
 
-    # Convert to PDF
-    return pdfkit.from_string(html_content, "temp.pdf", options={"enable-local-file-access": ""})
+    # Convert to PDF and store in memory
+    pdf_output = BytesIO()
+    pdfkit.from_string(html_content, pdf_output, options={"enable-local-file-access": ""})
+    
+    pdf_output.seek(0)  # Reset file pointer to the beginning
+    return pdf_output
+
 
 # Streamlit UI
 st.title("Project Report Generator")
@@ -174,4 +179,5 @@ if submitted:
 
     # Download buttons
     st.download_button("Download Report (DOCX)", word_output.getvalue(), "Project_Report.docx", "application/vnd.openxmlformats-officedocument.wordprocessingml.document")
-    st.download_button("Download Report (PDF)", pdf_data, "Project_Report.pdf", "application/pdf")
+    st.download_button("Download Report (PDF)", pdf_data.getvalue(), "Project_Report.pdf", "application/pdf")
+
