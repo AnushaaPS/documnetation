@@ -92,6 +92,13 @@ def fill_project_report(details, template):
 # Function to convert DOCX to PDF using wkhtmltopdf
 def convert_docx_to_pdf(html_content):
     """ Convert HTML content to PDF """
+
+    # If html_content is a BytesIO object, decode it to string
+    if isinstance(html_content, bytes):
+        html_content = html_content.decode("utf-8")
+    elif isinstance(html_content, _io.BytesIO):  
+        html_content = html_content.getvalue().decode("utf-8")
+
     if not isinstance(html_content, str):
         raise TypeError("html_content must be a string, got: " + str(type(html_content)))
 
