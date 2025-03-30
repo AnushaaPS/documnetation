@@ -91,21 +91,28 @@ def fill_project_report(details, template):
     return output
 
 # Function to convert DOCX to PDF using wkhtmltopdf
+import pdfkit
+import io
+
 def convert_docx_to_pdf(html_content):
-    print("Type of html_content:", type(html_content))  # Debugging step
+    print("Debug: Type of html_content ->", type(html_content))  # Debugging step
 
-    if isinstance(html_content, bool):  # ❌ Invalid type
-        raise ValueError("html_content cannot be a boolean!")
+    # Handle incorrect boolean values
+    if isinstance(html_content, bool):
+        raise ValueError("html_content should not be a boolean!")
 
+    # Convert bytes or BytesIO to string
     if isinstance(html_content, bytes):
         html_content = html_content.decode("utf-8", errors="replace")
     elif isinstance(html_content, io.BytesIO):
         html_content = html_content.getvalue().decode("utf-8", errors="replace")
 
+    # Ensure it's now a string
     if not isinstance(html_content, str):
         raise TypeError(f"html_content must be a string, got: {type(html_content)}")
 
-    return pdfkit.from_string(html_content, "temp.pdf", options=options, configuration=config)
+    # Convert to PDF
+    return pdfkit.from_string(html_content, "temp.pdf", options={"enable-local-file-access": ""})
 
 # Streamlit UI
 st.title("Project Report Generator")
