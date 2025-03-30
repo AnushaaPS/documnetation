@@ -94,30 +94,21 @@ def fill_project_report(details, template):
 import pdfkit
 import io
 
-def convert_docx_to_pdf(html_content):
-    print("Debug: Type of html_content ->", type(html_content))  # Debugging step
+import pypandoc
 
-    # Handle incorrect boolean values
-    if isinstance(html_content, bool):
-        raise ValueError("html_content should not be a boolean!")
+def convert_docx_to_pdf(docx_bytes):
+    with open("temp.docx", "wb") as f:
+        f.write(docx_bytes.getvalue())  # Save the DOCX file
 
-    # Convert bytes or BytesIO to string
-    if isinstance(html_content, bytes):
-        html_content = html_content.decode("utf-8", errors="replace")
-    elif isinstance(html_content, io.BytesIO):
-        html_content = html_content.getvalue().decode("utf-8", errors="replace")
+    # Convert DOCX to HTML
+    html_content = pypandoc.convert_file("temp.docx", "html")
 
-    # Ensure it's now a string
-    if not isinstance(html_content, str):
-        raise TypeError(f"html_content must be a string, got: {type(html_content)}")
-
-    # Convert to PDF and store in memory
-    pdf_output = BytesIO()
+    # Convert HTML to PDF
+    pdf_output = "temp.pdf"
     pdfkit.from_string(html_content, pdf_output, options={"enable-local-file-access": ""})
     
-    pdf_output.seek(0)  # Reset file pointer to the beginning
-    return pdf_output
-
+    with open(pdf_output, "rb") as f:
+        return f.read()  # Return the PDF as binary data
 
 # Streamlit UI
 st.title("Project Report Generator")
