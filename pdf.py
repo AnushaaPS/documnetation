@@ -97,7 +97,7 @@ def convert_docx_to_pdf(html_content):
     # If html_content is a BytesIO object, decode it to string
     if isinstance(html_content, bytes):
         html_content = html_content.decode("utf-8")
-    elif isinstance(html_content, _io.BytesIO):  
+    elif isinstance(html_content, io.BytesIO):  
         html_content = html_content.getvalue().decode("utf-8")
 
     if not isinstance(html_content, str):
