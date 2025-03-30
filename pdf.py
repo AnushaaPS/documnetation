@@ -91,7 +91,9 @@ def convert_docx_to_pdf(docx_bytes):
         f.write(docx_bytes.getvalue())
 
     pdf_output = "temp.pdf"
-    pypandoc.convert_file(temp_docx, "pdf", outputfile=pdf_output)
+    
+    # Convert using wkhtmltopdf (no pdflatex needed)
+    pypandoc.convert_file(temp_docx, "pdf", outputfile=pdf_output, extra_args=['--pdf-engine=wkhtmltopdf'])
 
     with open(pdf_output, "rb") as f:
         return f.read()
