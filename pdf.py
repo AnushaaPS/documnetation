@@ -92,6 +92,9 @@ def fill_project_report(details, template):
 # Function to convert DOCX to PDF using wkhtmltopdf
 def convert_docx_to_pdf(html_content):
     """ Convert HTML content to PDF """
+    if not isinstance(html_content, str):
+        raise TypeError("html_content must be a string, got: " + str(type(html_content)))
+
     return pdfkit.from_string(html_content, "temp.pdf", options=options, configuration=config)
 
 # Streamlit UI
