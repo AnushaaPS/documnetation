@@ -9,6 +9,10 @@ import pypandoc
 pypandoc.download_pandoc()  # Downloads Pandoc inside the environment
 
 import pdfkit
+options = {
+    'enable-local-file-access': '',
+}
+
 import os
 
 # Define wkhtmltopdf path for Streamlit Cloud
@@ -86,19 +90,9 @@ def fill_project_report(details, template):
     return output
 
 # Function to convert DOCX to PDF using wkhtmltopdf
-def convert_docx_to_pdf(docx_bytes):
-    with open("temp.docx", "wb") as temp_docx:
-        temp_docx.write(docx_bytes.getvalue())
-
-    html_content = pypandoc.convert_file("temp.docx", "html")
-    
-    with open("temp.html", "w", encoding="utf-8") as html_file:
-        html_file.write(html_content)
-
-    pdfkit.from_file("temp.html", "temp.pdf", configuration=config)
-
-    with open("temp.pdf", "rb") as pdf_file:
-        return pdf_file.read()
+def convert_docx_to_pdf(html_content):
+    """ Convert HTML content to PDF """
+    return pdfkit.from_string(html_content, "temp.pdf", options=options, configuration=config)
 
 # Streamlit UI
 st.title("Project Report Generator")
