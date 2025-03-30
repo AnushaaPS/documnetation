@@ -1,4 +1,4 @@
-python-docx
-docx2pdf
 streamlit
-pythoncom
+python-docx
+pywin32
+docx2pdf
