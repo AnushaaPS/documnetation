@@ -4,9 +4,14 @@ from docx.shared import Pt
 from docx.oxml import parse_xml
 from docx.oxml.ns import nsdecls
 from io import BytesIO
-import pythoncom
+import pypandoc
+import pdfkit
 import os
-from win32com import client
+
+# Define wkhtmltopdf path for Streamlit Cloud
+WKHTMLTOPDF_PATH = "/usr/bin/wkhtmltopdf"
+config = pdfkit.configuration(wkhtmltopdf=WKHTMLTOPDF_PATH)
+
 # Function to format student names and register numbers dynamically
 def format_students(students):
     students = [f"{name.strip()} {reg.strip()}" for name, reg in students if name.strip() and reg.strip()]
@@ -34,14 +39,6 @@ def fill_project_report(details, template):
     font_sizes = {
         "<PROJECT_NAME>": 18,
         "<STUDENT_DETAILS>": 14,
-        "<STUDENT_1>": 16,
-        "<REG_NO_1>": 16,
-        "<STUDENT_2>": 16,
-        "<REG_NO_2>": 16,
-        "<STUDENT_3>": 16,
-        "<REG_NO_3>": 16,
-        "<STUDENT_4>": 16,
-        "<REG_NO_4>": 16,
         "<DEGREE>": 16,
         "<DEPARTMENT>": 14,
         "<HOD_NAME>": 14,
@@ -85,12 +82,18 @@ def fill_project_report(details, template):
     doc.save(output)
     return output
 
-import pypandoc
-# Function to convert DOCX to PDF using pypandoc
+# Function to convert DOCX to PDF using wkhtmltopdf
 def convert_docx_to_pdf(docx_bytes):
     with open("temp.docx", "wb") as temp_docx:
         temp_docx.write(docx_bytes.getvalue())
-    pdf_bytes = pypandoc.convert_file("temp.docx", "pdf", outputfile="temp.pdf")
+
+    html_content = pypandoc.convert_file("temp.docx", "html")
+    
+    with open("temp.html", "w", encoding="utf-8") as html_file:
+        html_file.write(html_content)
+
+    pdfkit.from_file("temp.html", "temp.pdf", configuration=config)
+
     with open("temp.pdf", "rb") as pdf_file:
         return pdf_file.read()
 
@@ -109,13 +112,12 @@ with st.form("project_form"):
     student_4 = st.text_input("Student 4 Name (Optional)", "")
     reg_no_4 = st.text_input("Register Number 4 (Optional)", "")
     degree = st.selectbox("Degree", ["BACHELOR OF ENGINEERING", "BACHELOR OF TECHNOLOGY"])
-    department = st.selectbox("Department", ["COMPUTER SCIENCE AND ENGINEERING", "ARTIFICIAL INTELLIGENCE AND DATA SCIENCE", "INFORMATION TECHNOLOGY", "ELECTRONICS AND COMMUNICATION ENGINEERING","ELECTRICAL AND ELECTRONICS ENGINEERING","BIO-TECHNOLOGY", "MECHANICAL ENGINEERING","MECHATRONICS ENGINEERING", "CIVIL ENGINEERING"])
+    department = st.selectbox("Department", ["COMPUTER SCIENCE AND ENGINEERING", "INFORMATION TECHNOLOGY", "ELECTRONICS AND COMMUNICATION ENGINEERING"])
     hod_name = st.text_input("HoD Name", "")
     hod_gender = st.radio("HoD Gender", ["Male", "Female"])
     supervisor_name = st.text_input("Supervisor Name", "")
     supervisor_gender = st.radio("Supervisor Gender", ["Male", "Female"])
     supervisor_designation = st.selectbox("Supervisor Designation", ["Assistant Professor", "Associate Professor", "Professor"])
-    department_hod_supervisor = st.selectbox("Department of HoD & Supervisor", ["Computer Science and Engineering", "Artificial Intelligence And Data Science", "Information Technology", "Electronics And Communication Engineering","Electrical And Electronics Engineering","Bio-Technology", "Mechanical Engineering","Mechatronics Engineering", "Civil Engineering"])
     
     if project_type == "External Project":
         industry_name = st.text_input("Industry Name", "")
@@ -126,36 +128,21 @@ with st.form("project_form"):
     submitted = st.form_submit_button("Generate Report")
     
 if submitted:
-    students_list = [
-        (student_1, reg_no_1),
-        (student_2, reg_no_2),
-        (student_3, reg_no_3),
-        (student_4, reg_no_4)
-    ]
-    
+    students_list = [(student_1, reg_no_1), (student_2, reg_no_2), (student_3, reg_no_3), (student_4, reg_no_4)]
     formatted_students = format_students(students_list)
-    
+
     details = {
         "<PROJECT_NAME>": project_name,
         "<STUDENT_DETAILS>": formatted_students,
-        "<STUDENT_1>": student_1,
-        "<REG_NO_1>": reg_no_1,
-        "<STUDENT_2>": student_2,
-        "<REG_NO_2>": reg_no_2,
-        "<STUDENT_3>": student_3,
-        "<REG_NO_3>": reg_no_3,
-        "<STUDENT_4>": student_4,
-        "<REG_NO_4>": reg_no_4,
         "<DEGREE>": degree,
         "<DEPARTMENT>": department,
         "<HOD_NAME>": hod_name,
         "<SUPERVISOR_NAME>": supervisor_name,
         "<DESIGNATION>": supervisor_designation,
-        "<DEPARTMENT_1>": department_hod_supervisor,
         "<HOD_PRONOUN>": "his" if hod_gender == "Male" else "her",
         "<SUPERVISOR_PRONOUN>": "his" if supervisor_gender == "Male" else "her"
     }
-    
+
     if project_type == "External Project":
         details.update({
             "<INDUSTRY_NAME>": industry_name,
@@ -164,10 +151,10 @@ if submitted:
             "<INDUSTRY_PERSON_PRONOUN>": "his" if industry_person_gender == "Male" else "her"
         })
     
-    template = "UG Internal Project.docx" if project_type == "Internal Project" else "UG External Project.docx"
-    # Generate Word report
+    template = "UG_Internal_Project.docx" if project_type == "Internal Project" else "UG_External_Project.docx"
     word_output = fill_project_report(details, template)
     pdf_data = convert_docx_to_pdf(word_output)
+
     # Download buttons
     st.download_button("Download Report (DOCX)", word_output.getvalue(), "Project_Report.docx", "application/vnd.openxmlformats-officedocument.wordprocessingml.document")
     st.download_button("Download Report (PDF)", pdf_data, "Project_Report.pdf", "application/pdf")
