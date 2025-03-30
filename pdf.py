@@ -92,16 +92,18 @@ def fill_project_report(details, template):
 
 # Function to convert DOCX to PDF using wkhtmltopdf
 def convert_docx_to_pdf(html_content):
-    """ Convert HTML content to PDF """
+    print("Type of html_content:", type(html_content))  # Debugging step
 
-    # If html_content is a BytesIO object, decode it to string
+    if isinstance(html_content, bool):  # ❌ Invalid type
+        raise ValueError("html_content cannot be a boolean!")
+
     if isinstance(html_content, bytes):
         html_content = html_content.decode("utf-8", errors="replace")
-    elif isinstance(html_content, io.BytesIO):  
+    elif isinstance(html_content, io.BytesIO):
         html_content = html_content.getvalue().decode("utf-8", errors="replace")
 
     if not isinstance(html_content, str):
-        raise TypeError("html_content must be a string, got: " + str(type(html_content)))
+        raise TypeError(f"html_content must be a string, got: {type(html_content)}")
 
     return pdfkit.from_string(html_content, "temp.pdf", options=options, configuration=config)
 
