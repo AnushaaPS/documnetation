@@ -170,5 +170,5 @@ if submitted:
 
     # Download buttons
     st.download_button("Download Report (DOCX)", word_output.getvalue(), "Project_Report.docx", "application/vnd.openxmlformats-officedocument.wordprocessingml.document")
-    st.download_button("Download Report (PDF)", pdf_data.getvalue(), "Project_Report.pdf", "application/pdf")
+    st.download_button("Download Report (PDF)", pdf_data, "Project_Report.pdf", "application/pdf")
 
