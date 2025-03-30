@@ -97,22 +97,21 @@ import io
 def convert_docx_to_pdf(html_content):
     print("Debug: Type of html_content ->", type(html_content))  # Debugging step
 
-    # Handle incorrect boolean values
-    if isinstance(html_content, bool):
-        raise ValueError("html_content should not be a boolean!")
-
-    # Convert bytes or BytesIO to string
+    # Ensure html_content is a string
     if isinstance(html_content, bytes):
         html_content = html_content.decode("utf-8", errors="replace")
     elif isinstance(html_content, io.BytesIO):
         html_content = html_content.getvalue().decode("utf-8", errors="replace")
 
-    # Ensure it's now a string
     if not isinstance(html_content, str):
         raise TypeError(f"html_content must be a string, got: {type(html_content)}")
 
-    # Convert to PDF
-    return pdfkit.from_string(html_content, "temp.pdf", options={"enable-local-file-access": ""})
+    # Convert to PDF and store in memory buffer
+    pdf_output = io.BytesIO()
+    pdfkit.from_string(html_content, pdf_output, options={"enable-local-file-access": ""})
+    
+    # Return binary content
+    return pdf_output.getvalue()
 
 # Streamlit UI
 st.title("Project Report Generator")
