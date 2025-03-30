@@ -85,18 +85,14 @@ def fill_project_report(details, template):
     doc.save(output)
     return output
 
-# Function to convert DOCX to PDF
+import pdfkit
+
 def convert_docx_to_pdf(docx_path, pdf_path):
-    pythoncom.CoInitialize()  # Initialize COM
-    try:
-        word = client.Dispatch("Word.Application")
-        word.Visible = False  # Run Word in background
-        doc = word.Documents.Open(os.path.abspath(docx_path))
-        doc.SaveAs(os.path.abspath(pdf_path), FileFormat=17)  # 17 = PDF format
-        doc.Close()
-        word.Quit()
-    finally:
-        pythoncom.CoUninitialize()  # Uninitialize COM
+    options = {
+        'page-size': 'A4',
+        'encoding': 'UTF-8'
+    }
+    pdfkit.from_file(docx_path, pdf_path, options=options)
 
 # Streamlit UI
 st.title("Project Report Generator")
