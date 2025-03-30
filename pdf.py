@@ -86,12 +86,14 @@ def fill_project_report(details, template):
 
 import pdfkit
 
+config = pdfkit.configuration(wkhtmltopdf='/usr/bin/wkhtmltopdf')
+
 def convert_docx_to_pdf(docx_path, pdf_path):
     options = {
         'page-size': 'A4',
         'encoding': 'UTF-8'
     }
-    pdfkit.from_file(docx_path, pdf_path, options=options)
+    pdfkit.from_file(docx_path, pdf_path, options=options, configuration=config)
 
 # Streamlit UI
 st.title("Project Report Generator")
