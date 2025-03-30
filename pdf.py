@@ -151,7 +151,7 @@ if submitted:
             "<INDUSTRY_PERSON_PRONOUN>": "his" if industry_person_gender == "Male" else "her"
         })
     
-    template = "UG_Internal_Project.docx" if project_type == "Internal Project" else "UG_External_Project.docx"
+    template = "UG Internal Project.docx" if project_type == "Internal Project" else "UG External Project.docx"
     word_output = fill_project_report(details, template)
     pdf_data = convert_docx_to_pdf(word_output)
 
