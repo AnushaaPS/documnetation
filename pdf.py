@@ -4,9 +4,8 @@ from docx.shared import Pt
 from docx.oxml import parse_xml
 from docx.oxml.ns import nsdecls
 from io import BytesIO
-import pythoncom
 import os
-from win32com import client
+
 # Function to format student names and register numbers dynamically
 def format_students(students):
     students = [f"{name.strip()} {reg.strip()}" for name, reg in students if name.strip() and reg.strip()]
