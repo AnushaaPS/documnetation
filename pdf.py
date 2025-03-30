@@ -151,7 +151,7 @@ if submitted:
             "<INDUSTRY_PERSON_PRONOUN>": "his" if industry_person_gender == "Male" else "her"
         })
     
-    template = "UG Internal Project.docx" if project_type == "Internal Project" else "UG External Project.docx"
+    template = os.path.abspath("UG Internal Project.docx") if project_type == "Internal Project" else os.path.abspath("UG External Project.docx")
     word_output = fill_project_report(details, template)
     pdf_data = convert_docx_to_pdf(word_output)
 
