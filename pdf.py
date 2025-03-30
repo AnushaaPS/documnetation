@@ -168,6 +168,7 @@ if submitted:
         "<HOD_NAME>": hod_name,
         "<SUPERVISOR_NAME>": supervisor_name,
         "<DESIGNATION>": supervisor_designation,
+        "<DEPARTMENT_1>": department_hod_supervisor,
         "<HOD_PRONOUN>": "his" if hod_gender == "Male" else "her",
         "<SUPERVISOR_PRONOUN>": "his" if supervisor_gender == "Male" else "her"
     }
