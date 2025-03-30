@@ -4,21 +4,8 @@ from docx.shared import Pt
 from docx.oxml import parse_xml
 from docx.oxml.ns import nsdecls
 from io import BytesIO
-import pypandoc
-import io
-
-pypandoc.download_pandoc()  # Downloads Pandoc inside the environment
-
-import pdfkit
-options = {
-    'enable-local-file-access': '',
-}
-
 import os
-
-# Define wkhtmltopdf path for Streamlit Cloud
-WKHTMLTOPDF_PATH = "/usr/bin/wkhtmltopdf"
-config = pdfkit.configuration(wkhtmltopdf=WKHTMLTOPDF_PATH)
+import subprocess
 
 # Function to format student names and register numbers dynamically
 def format_students(students):
@@ -98,25 +85,27 @@ def fill_project_report(details, template):
     doc.save(output)
     return output
 
-# Function to convert DOCX to PDF using wkhtmltopdf
-import pdfkit
-import io
-
-import pypandoc
-
+# Function to convert DOCX to PDF using LibreOffice
 def convert_docx_to_pdf(docx_bytes):
-    with open("temp.docx", "wb") as f:
-        f.write(docx_bytes.getvalue())  # Save the DOCX file
+    temp_docx = "temp.docx"
+    temp_pdf = "temp.pdf"
 
-    # Convert DOCX to HTML
-    html_content = pypandoc.convert_file("temp.docx", "html")
+    # Save the DOCX file
+    with open(temp_docx, "wb") as f:
+        f.write(docx_bytes.getvalue())
 
-    # Convert HTML to PDF
-    pdf_output = "temp.pdf"
-    pdfkit.from_string(html_content, pdf_output, options={"enable-local-file-access": ""})
-    
-    with open(pdf_output, "rb") as f:
-        return f.read()  # Return the PDF as binary data
+    # Convert DOCX to PDF using LibreOffice
+    subprocess.run(["libreoffice", "--headless", "--convert-to", "pdf", temp_docx])
+
+    # Read the generated PDF
+    with open(temp_pdf, "rb") as f:
+        pdf_bytes = f.read()
+
+    # Clean up temporary files
+    os.remove(temp_docx)
+    os.remove(temp_pdf)
+
+    return pdf_bytes  # Return the PDF as binary data
 
 # Streamlit UI
 st.title("Project Report Generator")
@@ -186,7 +175,5 @@ if submitted:
     word_output = fill_project_report(details, template)
     pdf_data = convert_docx_to_pdf(word_output)
 
-    # Download buttons
     st.download_button("Download Report (DOCX)", word_output.getvalue(), "Project_Report.docx", "application/vnd.openxmlformats-officedocument.wordprocessingml.document")
     st.download_button("Download Report (PDF)", pdf_data, "Project_Report.pdf", "application/pdf")
-
