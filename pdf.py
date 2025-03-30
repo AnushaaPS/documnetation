@@ -4,8 +4,9 @@ from docx.shared import Pt
 from docx.oxml import parse_xml
 from docx.oxml.ns import nsdecls
 from io import BytesIO
+import pythoncom
 import os
-
+from win32com import client
 # Function to format student names and register numbers dynamically
 def format_students(students):
     students = [f"{name.strip()} {reg.strip()}" for name, reg in students if name.strip() and reg.strip()]
@@ -84,16 +85,14 @@ def fill_project_report(details, template):
     doc.save(output)
     return output
 
-import pdfkit
-
-config = pdfkit.configuration(wkhtmltopdf='/usr/bin/wkhtmltopdf')
-
-def convert_docx_to_pdf(docx_path, pdf_path):
-    options = {
-        'page-size': 'A4',
-        'encoding': 'UTF-8'
-    }
-    pdfkit.from_file(docx_path, pdf_path, options=options, configuration=config)
+import pypandoc
+# Function to convert DOCX to PDF using pypandoc
+def convert_docx_to_pdf(docx_bytes):
+    with open("temp.docx", "wb") as temp_docx:
+        temp_docx.write(docx_bytes.getvalue())
+    pdf_bytes = pypandoc.convert_file("temp.docx", "pdf", outputfile="temp.pdf")
+    with open("temp.pdf", "rb") as pdf_file:
+        return pdf_file.read()
 
 # Streamlit UI
 st.title("Project Report Generator")
@@ -168,20 +167,7 @@ if submitted:
     template = "UG Internal Project.docx" if project_type == "Internal Project" else "UG External Project.docx"
     # Generate Word report
     word_output = fill_project_report(details, template)
-    
-    # Save DOCX file locally for conversion
-    docx_path = "Project_Report.docx"
-    pdf_path = "Project_Report.pdf"
-    with open(docx_path, "wb") as f:
-        f.write(word_output.getvalue())
-    
-    # Convert DOCX to PDF
-    convert_docx_to_pdf(docx_path, pdf_path)
-    
-    # Load PDF file for download
-    with open(pdf_path, "rb") as f:
-        pdf_data = f.read()
-
+    pdf_data = convert_docx_to_pdf(word_output)
     # Download buttons
     st.download_button("Download Report (DOCX)", word_output.getvalue(), "Project_Report.docx", "application/vnd.openxmlformats-officedocument.wordprocessingml.document")
     st.download_button("Download Report (PDF)", pdf_data, "Project_Report.pdf", "application/pdf")
